@@ -152,12 +152,12 @@ class Rook(Piece):
                 posy += validList[i][1]
 
                 # if we go off the board
-                if (posx, posy) not in board.gameBoard:
+                if (posx, posy) not in board:
                     break
                 # if we run into another piece
-                elif board.gameBoard[(posx, posy)] is not None:
+                elif board[(posx, posy)] is not None:
                     # enemy piece
-                    if board.gameBoard[(posx,posy)].colour != self.colour:
+                    if board[(posx,posy)].colour != self.colour:
                         moveList.append((posx,posy))
                     break
                 moveList.append((posx,posy))
@@ -172,6 +172,37 @@ class Knight(Piece):
 
     def validMoves(self, board):
         moveList = []
+        # posx, posy = self.pos[0], self.pos[1]
+        validList = [
+            (-2, 1),  # up-up-right
+            (-1, 2),  # up-right-right
+            (-2, -1), # up-up-left
+            (-1, -2), # up-left-left
+
+            (2, 1),   # down-down-right
+            (1, 2),   # down-right-right
+            (2, -1),  # down-down-left
+            (1, -2)   # down-left-left
+        ]
+        # loop over the each direction (up, down)
+        for i in range(8):
+            posx, posy = self.pos[0], self.pos[1]
+            posx += validList[i][0]
+            posy += validList[i][1]
+
+        # if we go off the board
+            if (posx, posy) not in board:
+                continue
+
+            # if we run into another piece
+            if board[(posx, posy)] is not None:
+                # enemy piece
+                if board[(posx,posy)].colour != self.colour:
+                    moveList.append((posx,posy))
+                    
+            else:
+                moveList.append((posx,posy))
+
         return moveList
 
 
