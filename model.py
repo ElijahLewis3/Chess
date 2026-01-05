@@ -2,7 +2,34 @@ from abc import ABC
 from abc import abstractmethod
 
 class Game:
-    pass
+    def __init__(self, board, playerOne, playerTwo):
+        self.board = board
+        self.playerOne = playerOne
+        self.playerTwo = playerTow
+        self.winner = None
+        #! may need to change it from being a player object to being an int
+        self.turn = playerOne
+
+    def movePiece(self, pos1, pos2):
+        pass
+    
+    def canCapture(self, pos1, pos2):
+        pass
+    
+    def switchTurn(self):
+        pass
+    
+    def checkedPinned(self, pos):
+        pass
+    
+    def canCheck(self):
+        pass
+    
+    def getPiecesCheckingEnemy(self):
+        pass
+    
+    def isKingSafe(self, tmpBoard, kingPos):
+        pass
 
 class Board:
     def __init__(self):
@@ -67,9 +94,20 @@ class Board:
         finalString += "\ta\tb\tc\td\te\tf\tg\th\n\n"
         return finalString
 
-
+    #! under the assumption the Game class made sure the move was possible
+    def movePiece(self,pos1, pos2):
+        self.gameBoard[pos2] = self.gameBoard[pos1]
+        self.gameBoard[pos1] = None
 class Player:
-    pass
+    def __init__(self, name, colour):
+        self.name = name
+        self.colour = colour
+        self.draw = False
+        self.capturedPieces = []
+
+
+    def declareDraw(self):
+        self.draw = True
 
 
 ############ PIECES ############
@@ -81,7 +119,7 @@ class Piece(ABC):
         self.isPinned = False
     
     @abstractmethod
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
 
@@ -95,8 +133,35 @@ class Rook(Piece):
         self.hasMoved = False
         self.symbol = "R" if colour else "r"
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
+        posx, posy = self.pos[0], self.pos[1]
+        
+        validList = [
+            (-1,  0), # up
+            (1 ,  0), # down
+            (0 , -1), # right
+            (0 ,  1), # left
+        ]
+
+        # loop over each direction
+        for i in range(4):
+            posx, posy = self.pos[0], self.pos[1]
+            while True:
+                posx += validList[i][0] 
+                posy += validList[i][1]
+
+                # if we go off the board
+                if (posx, posy) not in board.gameBoard:
+                    break
+                # if we run into another piece
+                elif board.gameBoard[(posx, posy)] is not None:
+                    # enemy piece
+                    if board.gameBoard[(posx,posy)].colour != self.colour:
+                        moveList.append((posx,posy))
+                    break
+                moveList.append((posx,posy))
+                
         return moveList
 
 class Knight(Piece):
@@ -105,7 +170,7 @@ class Knight(Piece):
         self.symbol = "N" if colour else "n"
 
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
 
@@ -115,7 +180,7 @@ class Bishop(Piece):
         super().__init__(pos,colour)
         self.symbol = "B" if colour else "b"
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
 
@@ -124,7 +189,7 @@ class Queen(Piece):
         super().__init__(pos,colour)
         self.symbol = "Q" if colour else "q"
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
 
@@ -135,7 +200,7 @@ class King(Piece):
         self.hasMoved = False
         self.symbol = "K" if colour else "k"
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
 
@@ -146,6 +211,6 @@ class Pawn(Piece):
         self.isPromoted = False
         self.symbol = "P" if colour else "p"
 
-    def validMoves(self):
+    def validMoves(self, board):
         moveList = []
         return moveList
