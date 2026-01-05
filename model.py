@@ -94,10 +94,15 @@ class Board:
         finalString += "\ta\tb\tc\td\te\tf\tg\th\n\n"
         return finalString
 
+    def removePiece(self, pos):
+        if (pos[0],pos[1]) in self.gameBoard:
+            self.gameBoard[pos] = None
+
     #! under the assumption the Game class made sure the move was possible
     def movePiece(self,pos1, pos2):
         self.gameBoard[pos2] = self.gameBoard[pos1]
         self.gameBoard[pos1] = None
+
 class Player:
     def __init__(self, name, colour):
         self.name = name
@@ -123,8 +128,9 @@ class Piece(ABC):
         moveList = []
         return moveList
 
-    def canCheck(self, kingPos):
-        return True if kingPos in self.validMoves() else False
+    #? Might need to make changes to this method
+    def canCheck(self, kingPos,board):
+        return True if kingPos in self.validMoves(board) else False
 
 
 class Rook(Piece):
@@ -199,7 +205,7 @@ class Knight(Piece):
                 # enemy piece
                 if board[(posx,posy)].colour != self.colour:
                     moveList.append((posx,posy))
-                    
+
             else:
                 moveList.append((posx,posy))
 
@@ -213,6 +219,33 @@ class Bishop(Piece):
 
     def validMoves(self, board):
         moveList = []
+        validList = [
+            (-1, 1),  # up-right
+            (-1, -1), # up-left
+            (1, 1),   # down-right
+            (1, -1)   # down-left
+        ]
+
+        for i in range(4):
+            posx, posy = self.pos[0], self.pos[1]
+            while True:
+                posx += validList[i][0]
+                posy += validList[i][1]
+
+                # if the position is outside the board
+                if (posx, posy) not in board:
+                    break
+
+                # if there is a piece at that position
+                if board[(posx,posy)] is not None:
+                    if board[(posx,posy)].colour != self.colour:
+                        moveList.append((posx,posy))
+
+                    break
+                
+                else:
+                    moveList.append((posx,posy))
+
         return moveList
 
 class Queen(Piece):
@@ -240,6 +273,7 @@ class Pawn(Piece):
     def __init__(self, pos, colour):
         super().__init__(pos,colour)
         self.isPromoted = False
+        self.hasMoved = False
         self.symbol = "P" if colour else "p"
 
     def validMoves(self, board):
