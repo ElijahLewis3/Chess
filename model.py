@@ -5,7 +5,7 @@ class Game:
     def __init__(self, board, playerOne, playerTwo):
         self.board = board
         self.playerOne = playerOne
-        self.playerTwo = playerTow
+        self.playerTwo = playerTwo
         self.winner = None
         #! may need to change it from being a player object to being an int
         self.turn = playerOne
@@ -30,6 +30,12 @@ class Game:
     
     def isKingSafe(self, tmpBoard, kingPos):
         pass
+
+    def checkPromotion(self, pos):
+        if self.board.gameBoard[pos].promote():
+            colour = self.board.gameBoard[pos].colour
+            self.board.removePiece(pos)
+            self.board.gameBoard[pos] = Queen(pos,colour)
 
 class Board:
     def __init__(self):
@@ -102,6 +108,7 @@ class Board:
     def movePiece(self,pos1, pos2):
         self.gameBoard[pos2] = self.gameBoard[pos1]
         self.gameBoard[pos1] = None
+        self.gameBoard[pos2].pos = pos2
 
 class Player:
     def __init__(self, name, colour):
@@ -284,6 +291,12 @@ class Queen(Piece):
                 moveList.append((posx,posy))
         return moveList
 
+    """ another way to check Queen's moves
+        bishopMoves = Bishop.validMoves(self,board)
+        rookMoves = Rook.validMoves(self,board)
+        return rookMoves + bishopMoves 
+    """
+
 #TODO
 class King(Piece):
     def __init__(self, pos, colour):
@@ -320,7 +333,7 @@ class King(Piece):
         return moveList
 
 
-#TODO
+
 class Pawn(Piece):
     def __init__(self, pos, colour):
         super().__init__(pos,colour)
@@ -329,8 +342,6 @@ class Pawn(Piece):
         self.symbol = "P" if colour else "p"
 
     def validMoves(self, board):
-        #! Need to add a way to promote a pawn
-        #todo Create a Promote method
         validList = []
         posx, posy = self.pos[0], self.pos[1]
 
@@ -381,3 +392,18 @@ class Pawn(Piece):
                 return validList
             validList.append((posx - 1, posy))
         return validList
+    
+    def promote(self):
+        #black
+        if self.colour == 0:
+            if self.pos[0] == 7:
+                return True
+            else:
+                return False
+        
+        #white
+        elif self.colour == 1:
+            if self.pos[0] == 0:
+                return True
+            else:
+                return False
