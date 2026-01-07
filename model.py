@@ -17,13 +17,27 @@ class Game:
         pass
     
     def switchTurn(self):
-        pass
+        if self.turn == playerOne:
+            self.turn = playerTwo
+        else:
+            self.turn = playerOne
     
     def checkedPinned(self, pos):
         pass
     
-    def canCheck(self):
-        pass
+    def isCheckingEnemy(self, player):
+        colour = player.colour
+        kingPos = None
+        if colour == 1:
+            kingPos = self.board.getBlackKingPos()
+        elif colour == 0:
+            kingPos = self.board.getWhiteKingPos()
+
+        for pos in self.board.gameBoard:
+            if self.board.gameBoard[pos] is not None and self.board.gameBoard[pos].colour == colour:
+                if kingPos in self.board.gameBoard[pos].validMoves(self.board.gameBoard):
+                    return True
+        return False
     
     def getPiecesCheckingEnemy(self):
         pass
@@ -110,6 +124,16 @@ class Board:
         self.gameBoard[pos1] = None
         self.gameBoard[pos2].pos = pos2
 
+    def getWhiteKingPos(self):
+        for pos in self.gameBoard:
+            if isinstance(self.gameBoard[pos],King) and self.gameBoard[pos].colour == 1:
+                return pos
+
+    def getBlackKingPos(self):
+        for pos in self.gameBoard:
+            if isinstance(self.gameBoard[pos],King) and self.gameBoard[pos].colour == 0:
+                return pos
+
 class Player:
     def __init__(self, name, colour):
         self.name = name
@@ -134,10 +158,6 @@ class Piece(ABC):
     def validMoves(self, board):
         moveList = []
         return moveList
-
-    #? Might need to make changes to this method
-    def canCheck(self, kingPos,board):
-        return True if kingPos in self.validMoves(board) else False
 
 
 class Rook(Piece):
@@ -317,12 +337,12 @@ class King(Piece):
             (1, -1)   # down-left
         ]
 
-        for x in range(8):
+        for i in range(8):
             posx, posy = self.pos[0], self.pos[1]
             posx += validList[i][0]
             posy += validList[i][1]
 
-            if (posx, posy) not in self.gameBoard:
+            if (posx, posy) not in board:
                 continue
              
             #! Need to be able to move to a spot that prevents the King from being in check
