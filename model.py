@@ -146,8 +146,8 @@ class Rook(Piece):
         validList = [
             (-1,  0), # up
             (1 ,  0), # down
-            (0 , -1), # right
-            (0 ,  1), # left
+            (0 , -1), # left
+            (0 ,  1), # right
         ]
 
         # loop over each direction
@@ -255,9 +255,36 @@ class Queen(Piece):
 
     def validMoves(self, board):
         moveList = []
+        validList = [
+            (-1,  0), # up
+            (1 ,  0), # down
+            (0 , -1), # left
+            (0 ,  1), # right
+            (-1, 1),  # up-right
+            (-1, -1), # up-left
+            (1, 1),   # down-right
+            (1, -1)   # down-left
+        ]
+
+        for i in range(8):
+            posx, posy = self.pos[0], self.pos[1]
+            while True:
+                posx += validList[i][0]
+                posy += validList[i][1]
+
+                # if we go off the board
+                if (posx, posy) not in board:
+                    break
+                # if we run into another piece
+                elif board[(posx, posy)] is not None:
+                    # enemy piece
+                    if board[(posx,posy)].colour != self.colour:
+                        moveList.append((posx,posy))
+                    break
+                moveList.append((posx,posy))
         return moveList
 
-
+#TODO
 class King(Piece):
     def __init__(self, pos, colour):
         super().__init__(pos,colour)
@@ -265,10 +292,35 @@ class King(Piece):
         self.symbol = "K" if colour else "k"
 
     def validMoves(self, board):
+        validList = [
+            (-1, 0), # up
+            (1, 0),  # down
+            (0, 1),  # right
+            (0, -1), # left
+
+            (-1, 1),  # up-right
+            (-1, -1), # up-left
+            (1, 1),   # down-right
+            (1, -1)   # down-left
+        ]
+
+        for x in range(8):
+            posx, posy = self.pos[0], self.pos[1]
+            posx += validList[i][0]
+            posy += validList[i][1]
+
+            if (posx, posy) not in self.gameBoard:
+                continue
+             
+            #! Need to be able to move to a spot that prevents the King from being in check
+            #Todo: Need to come back to this
+            # if self.gameBoard((posx, posy)) is not None:
+                # if 
         moveList = []
         return moveList
 
 
+#TODO
 class Pawn(Piece):
     def __init__(self, pos, colour):
         super().__init__(pos,colour)
@@ -277,5 +329,55 @@ class Pawn(Piece):
         self.symbol = "P" if colour else "p"
 
     def validMoves(self, board):
-        moveList = []
-        return moveList
+        #! Need to add a way to promote a pawn
+        #todo Create a Promote method
+        validList = []
+        posx, posy = self.pos[0], self.pos[1]
+
+        # black
+        if self.colour == 0:
+            # first move
+            if self.hasMoved == False and ((posx + 1, posy)) in board and board[(posx+  1, posy)] is None:
+                validList.append((posx + 2,posy))
+            
+            #capture down-right
+            if ((posx + 1, posy + 1)) in board and board[(posx+  1, posy + 1)] is not None:
+                if board[(posx + 1,posy + 1)].colour != self.colour:
+                        validList.append((posx + 1,posy + 1))
+            
+            #capture down-left
+            if ((posx + 1, posy - 1)) in board and board[(posx+  1, posy - 1)] is not None:
+                if board[(posx + 1,posy - 1)].colour != self.colour:
+                        validList.append((posx + 1,posy - 1))
+
+            # if stepped out of bounds
+            if (posx + 1, posy) not in board:
+                return validList
+            # if there is a piece in front of the pawn
+            if ((posx + 1, posy)) in board and board[(posx+  1, posy)] is not None:
+                return validList
+            validList.append((posx + 1, posy))
+
+        else:
+            # first move
+            if self.hasMoved == False and ((posx - 1, posy)) in board and board[(posx -  1, posy)] is None:
+                validList.append((posx -2,posy))
+            
+            #capture up-right
+            if ((posx - 1, posy + 1)) in board and board[(posx -  1, posy + 1)] is not None:
+                if board[(posx - 1,posy + 1)].colour != self.colour:
+                        validList.append((posx - 1,posy + 1))
+            
+            #capture up-left
+            if ((posx -1, posy -1)) in board and board[(posx -  1, posy - 1)] is not None:
+                if board[(posx - 1,posy - 1)].colour != self.colour:
+                        validList.append((posx - 1,posy - 1))
+
+            # if stepped out of bounds
+            if (posx - 1, posy) not in board:
+                return validList
+            # if there is a piece in front of the pawn
+            if ((posx - 1, posy)) in board and board[(posx -  1, posy)] is not None:
+                return validList
+            validList.append((posx - 1, posy))
+        return validList
