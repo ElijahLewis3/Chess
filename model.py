@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+import copy
 
 class Game:
     def __init__(self, board, playerOne, playerTwo):
@@ -10,9 +11,11 @@ class Game:
         #! may need to change it from being a player object to being an int
         self.turn = playerOne
 
+    #TODO
     def movePiece(self, pos1, pos2):
         pass
-    
+    #TODO
+    #? is this method needed?
     def canCapture(self, pos1, pos2):
         pass
     
@@ -22,8 +25,27 @@ class Game:
         else:
             self.turn = playerOne
     
+    #TODO
+    #! Need to double check this
+    #! Loop through valid moves, remove moves that put the king in danger
     def checkedPinned(self, pos):
-        pass
+        colour = self.board.gameBoard[pos].colour
+        if colour == 1:
+            player = self.playerOne 
+        elif colour == 0:
+            player = self.playerTwo
+
+        tmpBoard = copy.deepcopy(self.board.gameBoard)
+        self.board.gameBoard[pos] = None
+
+        #checks the current player's king
+
+        if self.isKingSafe(player) == False:
+            self.board.gameBoard = copy.deepcopy(tmpBoard)
+            return True
+
+        self.board.gameBoard[pos] = copy.deepcopy(tmpBoard)
+        return False
     
     def isCheckingEnemy(self, player):
         colour = player.colour
@@ -39,11 +61,13 @@ class Game:
                     return True
         return False
     
+    #TODO
     def getPiecesCheckingEnemy(self):
         pass
     
-    def isKingSafe(self, tmpBoard, kingPos):
-        pass
+    def isKingSafe(self, player):
+        opposingPlayer = self.playerOne if player == self.playerTwo else self.playerTwo
+        return False if self.isCheckingEnemy(opposingPlayer) else True
 
     def checkPromotion(self, pos):
         if self.board.gameBoard[pos].promote():
